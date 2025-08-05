@@ -100,7 +100,7 @@ export default function Home() {
     if (phase === 'flashing') {
       const flashInterval = setInterval(() => {
         setIsVisible(prev => !prev);
-      }, 25); 
+      }, 50); 
 
       return () => {
         clearInterval(flashInterval);
