@@ -255,7 +255,7 @@ export default function Home() {
     return (
       <div className="fixed inset-0 w-screen h-screen bg-black flex items-center justify-center overflow-hidden">
         <div 
-          className={`transition-opacity duration-75 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+          className={`transition-opacity duration-75 ${isVisible ? 'opacity-100' : 'opacity-0'} scale-150`}
           style={{ 
             width: '100vw', 
             height: '100vh',
