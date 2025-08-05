@@ -1,115 +1,278 @@
+import { Maximize } from 'lucide-react';
 import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { useEffect, useState } from "react";
 
 export default function Home() {
-  return (
-    <div
-      className={`${geistSans.className} ${geistMono.className} font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20`}
-    >
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/pages/index.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const [isVisible, setIsVisible] = useState(true);
+  const [jumpscareStarted, setJumpscareStarted] = useState(false);
+  const [phase, setPhase] = useState<'waiting' | 'gif-playing' | 'gif-paused' | 'flash-intermediate' | 'zoom-phase' | 'foohoo-gif' | 'static-haha' | 'flashing'>('waiting');
+  const [isZooming, setIsZooming] = useState(false);
+  const [isBlinking, setIsBlinking] = useState(false);
+
+  useEffect(() => {
+    if (phase === 'gif-playing') {
+      const gifDuration = 4000;
+      
+      const gifTimer = setTimeout(() => {
+        setPhase('gif-paused');
+      }, gifDuration);
+
+      return () => clearTimeout(gifTimer);
+    }
+
+    if (phase === 'gif-paused') {
+      const pauseTimer = setTimeout(() => {
+        setPhase('flash-intermediate');
+      }, 1500);
+
+      return () => clearTimeout(pauseTimer);
+    }
+
+    if (phase === 'flash-intermediate') {
+      const blinkTimer = setTimeout(() => {
+        setIsBlinking(true);
+        setTimeout(() => {
+          setIsBlinking(false);
+        }, 75);
+      }, 500);
+
+      const blinkTimer2 = setTimeout(() => {
+        setIsBlinking(true);
+        setTimeout(() => {
+          setIsBlinking(false);
+        }, 75);
+      }, 1000);
+      const blinkTimer3 = setTimeout(() => {
+        setIsBlinking(true);
+        setTimeout(() => {
+          setIsBlinking(false);
+        }, 75);
+      }, 1100);
+
+      const intermediateTimer = setTimeout(() => {
+        setPhase('zoom-phase');
+      }, 1500);
+
+      return () => {
+        clearTimeout(blinkTimer);
+        clearTimeout(blinkTimer2);
+        clearTimeout(blinkTimer3);
+        clearTimeout(intermediateTimer);
+      };
+    }
+
+    if (phase === 'zoom-phase') {
+      const zoomStartTimer = setTimeout(() => {
+        setIsZooming(true);
+      }, 1575);
+
+      const zoomEndTimer = setTimeout(() => {
+        setPhase('foohoo-gif');
+        setIsZooming(false);
+      }, 1750);
+
+      return () => {
+        clearTimeout(zoomStartTimer);
+        clearTimeout(zoomEndTimer);
+      };
+    }
+
+    if (phase === 'foohoo-gif') {
+      const foohooTimer = setTimeout(() => {
+        setPhase('static-haha');
+      }, 2000);
+
+      return () => {
+        clearTimeout(foohooTimer);
+      };
+    }
+
+    if (phase === 'static-haha') {
+      const staticHahaTimer = setTimeout(() => {
+        setPhase('flashing');
+      }, 1000);
+
+      return () => {
+        clearTimeout(staticHahaTimer);
+      };
+    }
+
+    if (phase === 'flashing') {
+      const flashInterval = setInterval(() => {
+        setIsVisible(prev => !prev);
+      }, 25); 
+
+      return () => {
+        clearInterval(flashInterval);
+      };
+    }
+  }, [phase]);
+
+  const startJumpscare = async () => {
+    try {
+      const element = document.documentElement as HTMLElement & {
+        webkitRequestFullscreen?: () => Promise<void>;
+        msRequestFullscreen?: () => Promise<void>;
+      };
+      
+      if (element.requestFullscreen) {
+        await element.requestFullscreen();
+      } else if (element.webkitRequestFullscreen) {
+        await element.webkitRequestFullscreen();
+      } else if (element.msRequestFullscreen) {
+        await element.msRequestFullscreen();
+      }
+      
+      setJumpscareStarted(true);
+      setPhase('gif-playing');
+    } catch (error) {
+      console.error("Fullscreen request failed:", error);
+      setJumpscareStarted(true);
+      setPhase('gif-playing');
+    }
+  };
+
+  if (!jumpscareStarted) {
+    return (
+      <div className="fixed inset-0 w-screen h-screen bg-black flex flex-col items-center justify-center">
+        <Maximize className='text-white' size={30} onClick={startJumpscare} />
+        <p className='text-white text-sm font-mono mt-2'>(Epilepsy Warning)</p>
+      </div>
+    );
+  }
+
+  if (phase === 'gif-playing' || phase === 'gif-paused') {
+    return (
+      <div className="fixed inset-0 w-screen h-screen bg-black flex items-center justify-center overflow-hidden">
+        <div style={{ 
+          width: '100vw', 
+          height: '100vh',
+          position: 'relative'
+        }}>
+          <Image
+            src="/scary-scary-face.gif"
+            alt="Scary GIF"
+            fill
+            className="object-cover"
+            priority
+            unoptimized 
+          />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+      </div>
+    );
+  }
+
+  if (phase === 'flash-intermediate') {
+    return (
+      <div className="fixed inset-0 w-screen h-screen bg-black flex items-center justify-center overflow-hidden">
+        <div 
+          style={{ 
+            width: '100vw', 
+            height: '100vh',
+            position: 'relative',
+            opacity: isBlinking ? 0 : 1
+          }}
         >
           <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+            src="/maxresdefault.jpg"
+            alt="Intermediate Jumpscare"
+            fill
+            className="object-cover"
+            priority
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+        </div>
+      </div>
+    );
+  }
+
+  if (phase === 'zoom-phase') {
+    return (
+      <div className="fixed inset-0 w-screen h-screen bg-black flex items-center justify-center overflow-hidden">
+        <div 
+          style={{ 
+            width: '100vw', 
+            height: '100vh',
+            position: 'relative',
+            transform: isZooming ? 'scale(3.5)' : 'scale(1)',
+            transition: 'transform 0.05s linear'
+          }}
         >
           <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
+            src="/hq720.jpg"
+            alt="Zoom Jumpscare"
+            fill
+            className="object-cover"
+            priority
           />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+        </div>
+      </div>
+    );
+  }
+
+  if (phase === 'foohoo-gif') {
+    return (
+      <div className="fixed inset-0 w-screen h-screen bg-black flex items-center justify-center overflow-hidden">
+        <div style={{ 
+          width: '100vw', 
+          height: '100vh',
+          position: 'relative'
+        }}>
+          <Image
+            src="/foohoo.gif"
+            alt="Foohoo Jumpscare"
+            fill
+            className="object-cover"
+            priority
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (phase === 'static-haha') {
+    return (
+      <div className="fixed inset-0 w-screen h-screen bg-black flex items-center justify-center overflow-hidden">
+        <div 
+          style={{ 
+            width: '100vw', 
+            height: '100vh',
+            position: 'relative'
+          }}
         >
           <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
+            src="/haha.png"
+            alt="Static Haha"
+            fill
+            className="object-cover"
+            priority
           />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+        </div>
+      </div>
+    );
+  }
+
+  if (phase === 'flashing') {
+    return (
+      <div className="fixed inset-0 w-screen h-screen bg-black flex items-center justify-center overflow-hidden">
+        <div 
+          className={`transition-opacity duration-75 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+          style={{ 
+            width: '100vw', 
+            height: '100vh',
+            position: 'relative'
+          }}
+        >
+          <Image
+            src="/haha.png"
+            alt="Jumpscare"
+            fill
+            className="object-cover"
+            priority
+          />
+        </div>
+      </div>
+    );
+  }
+
+  return null;
 }
